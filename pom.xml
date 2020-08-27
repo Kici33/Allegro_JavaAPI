@@ -29,11 +29,11 @@
 
     <distributionManagement>
         <repository>
-            <id>packagecloud-myrepo</id>
+            <id>packagecloud-Kici33</id>
             <url>packagecloud+https://packagecloud.io/Kici33/AllegroAPI</url>
         </repository>
         <snapshotRepository>
-            <id>packagecloud-myrepo</id>
+            <id>packagecloud-Kici33</id>
             <url>packagecloud+https://packagecloud.io/Kici33/AllegroAPI</url>
         </snapshotRepository>
     </distributionManagement>
