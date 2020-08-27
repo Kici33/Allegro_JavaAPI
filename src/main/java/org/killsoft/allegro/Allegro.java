@@ -2,7 +2,6 @@ package org.killsoft.allegro;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
@@ -38,7 +37,7 @@ public class Allegro {
 
     public Auth authenticate() {
         String details = this.cId + ":" + cSecret;
-        String base64 = Base64.encode(details.getBytes()).replaceAll("\n", "");
+        String base64 = Arrays.toString(Base64.getEncoder().encode(details.getBytes())).replaceAll("\n", "");;
         Auth auth = gson.fromJson(getPage(environment.getAuthUrl() + "/auth/oauth/token?grant_type=client_credentials", "Authorization", "Basic " + base64), Auth.class);
         this.token = auth.getToken();
         return auth;
