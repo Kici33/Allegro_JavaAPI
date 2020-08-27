@@ -37,7 +37,8 @@ public class Allegro {
 
     public Auth authenticate() {
         String details = this.cId + ":" + cSecret;
-        String base64 = Arrays.toString(Base64.getEncoder().encode(details.getBytes())).replaceAll("\n", "");;
+        String base64 = Base64.getUrlEncoder().encodeToString(details.getBytes()).replaceAll("\n", "");
+        System.out.println(base64);
         Auth auth = gson.fromJson(getPage(environment.getAuthUrl() + "/auth/oauth/token?grant_type=client_credentials", "Authorization", "Basic " + base64), Auth.class);
         this.token = auth.getToken();
         return auth;

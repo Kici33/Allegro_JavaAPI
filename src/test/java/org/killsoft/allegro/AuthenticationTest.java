@@ -6,8 +6,8 @@ import org.killsoft.allegro.objects.Auth;
 public class AuthenticationTest {
 
     public static void main(String[] args) throws InterruptedException {
-        Allegro allegro = new Allegro("ffdbce6145624c23a89db2d97de158ec",
-                "sooMd2ILo6e5G4LL1apc3n7XipyRLbgw1DloQ2vRyJvoHyXqwR0JVTeHVBBVfygo", Environment.SANDBOX);
+        Allegro allegro = new Allegro("clientId",
+                "clientSecret", Environment.SANDBOX);
         Auth auth = allegro.authenticate();
 
         System.out.println("Token » " + auth.getToken());
