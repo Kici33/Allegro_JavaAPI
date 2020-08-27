@@ -27,6 +27,17 @@
         </plugins>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>packagecloud-myrepo</id>
+            <url>packagecloud+https://packagecloud.io/Kici33/AllegroAPI</url>
+        </repository>
+        <snapshotRepository>
+            <id>packagecloud-myrepo</id>
+            <url>packagecloud+https://packagecloud.io/Kici33/AllegroAPI</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
         <dependency>
@@ -41,7 +52,4 @@
             <version>2.8.6</version>
         </dependency>
     </dependencies>
-
-
-
 </project>
