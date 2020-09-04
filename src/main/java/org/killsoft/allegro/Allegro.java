@@ -22,7 +22,7 @@ public class Allegro {
     private final Gson gson = new Gson();
 
     private String token = null;
-
+    
     private final Environment environment;
     private final String apiURI;
     private final String cId;
@@ -43,6 +43,7 @@ public class Allegro {
         this.token = auth.getToken();
         return auth;
     }
+
     public Category[] getMainCategories() {
         HttpGet httpGet = new HttpGet(this.apiURI + "/sale/categories");
         httpGet.addHeader("Accept", "application/vnd.allegro.public.v1+json");
@@ -84,6 +85,8 @@ public class Allegro {
         }
         return categories.toArray(new Category[0]);
     }
+
+    
 
     private String getPage(HttpGet get) {
         HttpClient client = HttpClients.custom().setDefaultRequestConfig(RequestConfig.custom()
