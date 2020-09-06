@@ -17,13 +17,6 @@ Also If you want to contribute, feel free to create pull requests !
 - [ ] Getting user's rating summary
 - [ ] Modify the Buy Now price in an offer
 - [ ] Create a draft offer
-- [ ] Posting Offers
-- [ ] Complete a draft offer or edit an offer
-- [ ] Delete a draft offer
-- [ ] Batch offer publish / unpublish
-- [ ] Publish command summary
-- [ ] Publish command detailed report
-- [ ] Create offer based on product
 
 ## Table of content
 
