@@ -11,6 +11,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.killsoft.allegro.enums.Environment;
 import org.killsoft.allegro.objects.Auth;
 import org.killsoft.allegro.objects.Category;
+import org.killsoft.allegro.objects.Offer;
+import org.killsoft.allegro.objects.QueryParameters;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +24,7 @@ public class Allegro {
     private final Gson gson = new Gson();
 
     private String token = null;
-    
+
     private final Environment environment;
     private final String apiURI;
     private final String cId;
@@ -44,17 +46,49 @@ public class Allegro {
         return auth;
     }
 
+    public List<Offer> findOffers(QueryParameters parameters) {
+        if(this.token == null) throw new NullPointerException("Token Can't be null!");
+        StringBuilder url = new StringBuilder();
+        url.append(this.apiURI).append("/offers/listing?");
+        if(parameters.getCategoryId() != null) url.append("category.id=").append(parameters.getCategoryId()).append("&");
+        if(parameters.getPhrase() != null) url.append("phrase=").append(parameters.getPhrase()).append("&");
+        if(parameters.getSellerId() != null) url.append("seller.id=").append(parameters.getSellerId()).append("&");
+        if(parameters.getSellerLogin() != null) url.append("seller.login=").append(parameters.getSellerLogin()).append("&");
+        if(parameters.getSearchMode() != null) url.append("searchMode=").append(parameters.getSearchMode()).append("&");
+        if(parameters.getOffset() != 0) url.append("offset=").append(parameters.getOffset()).append("&");
+        if(parameters.getLimit() != 60) url.append("limit=").append(parameters.getLimit()).append("&");
+        if(parameters.getSort() != null) url.append("sort=").append(parameters.getSort()).append("&");
+        if(parameters.getInclude() != null) url.append("include=").append(parameters.getPhrase()).append("&");
+        if(!parameters.isFallback()) url.append("fallback=").append(parameters.isFallback()).append("&");
+        if(url.toString().equalsIgnoreCase(this.apiURI + "/offers/listing?"))
+            throw new NullPointerException("Query Parameters needs to contain at least 1 query parameter");
+        HttpGet httpGet = new HttpGet(url.substring(0, url.length()-1));
+        httpGet.addHeader("Authorization", "Bearer " + this.token);
+        httpGet.addHeader("Accept", "application/vnd.allegro.public.v1+json");
+        JsonObject object = gson.fromJson(getPage(httpGet), JsonObject.class);
+        List<Offer> offers = new ArrayList<>();
+        object.getAsJsonArray("promoted").forEach(jsonElement -> {
+            offers.add(gson.fromJson(jsonElement, Offer.class));
+        });
+        object.getAsJsonArray("regular").forEach(jsonElement -> {
+            offers.add(gson.fromJson(jsonElement, Offer.class));
+        });
+        return offers;
+    }
+
     public Category[] getMainCategories() {
+        if(this.token == null) throw new NullPointerException("Token Can't be null!");
         HttpGet httpGet = new HttpGet(this.apiURI + "/sale/categories");
         httpGet.addHeader("Accept", "application/vnd.allegro.public.v1+json");
         httpGet.addHeader("Authorization", "Bearer " + this.token);
-        JsonObject obj = gson.fromJson(getPage(httpGet), JsonObject.class);
+        JsonObject obj =  gson.fromJson(getPage(httpGet), JsonObject.class);
         List<Category> categories = new ArrayList<>();
         obj.get("categories").getAsJsonArray().forEach(jsonElement -> categories.add(gson.fromJson(jsonElement, Category.class)));
         return categories.toArray(new Category[0]);
     }
 
     public Category[] getSubCategories() {
+        if(this.token == null) throw new NullPointerException("Token Can't be null!");
         List<Category> categories = new ArrayList<>();
         for(Category category : getMainCategories()) {
             if(!category.isLeaf()) {
@@ -69,6 +103,7 @@ public class Allegro {
     }
 
     public Category[] getSubCategories(Category parentCategory) {
+        if(this.token == null) throw new NullPointerException("Token Can't be null!");
         List<Category> categories = new ArrayList<>();
         if(!parentCategory.isLeaf()) {
             HttpGet httpGet = new HttpGet(this.apiURI + "/sale/categories?parent.id=" + parentCategory.getId());
@@ -85,8 +120,6 @@ public class Allegro {
         }
         return categories.toArray(new Category[0]);
     }
-
-    
 
     private String getPage(HttpGet get) {
         HttpClient client = HttpClients.custom().setDefaultRequestConfig(RequestConfig.custom()
@@ -123,5 +156,4 @@ public class Allegro {
         }
         return null;
     }
-
 }
