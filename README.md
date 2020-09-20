@@ -15,7 +15,7 @@ Also If you want to contribute, feel free to create pull requests !
 
 - [x] Getting Offers
 - [x] Getting user's rating summary
-- [ ] Modify the Buy Now price in an offer // missing commandId parameter
+- [x] Modify the Buy Now price in an offer
 - [ ] Create a draft offer
 
 ## Table of content
