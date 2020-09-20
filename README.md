@@ -14,16 +14,9 @@ Also If you want to contribute, feel free to create pull requests !
 ### TODO: List until 1.0 release
 
 - [x] Getting Offers
-- [ ] Getting user's rating summary
-- [ ] Modify the Buy Now price in an offer
+- [x] Getting user's rating summary
+- [ ] Modify the Buy Now price in an offer // missing commandId parameter
 - [ ] Create a draft offer
-- [ ] Posting Offers
-- [ ] Complete a draft offer or edit an offer
-- [ ] Delete a draft offer
-- [ ] Batch offer publish / unpublish
-- [ ] Publish command summary
-- [ ] Publish command detailed report
-- [ ] Create offer based on product
 
 ## Table of content
 

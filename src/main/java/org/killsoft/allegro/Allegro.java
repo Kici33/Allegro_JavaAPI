@@ -1,27 +1,33 @@
 package org.killsoft.allegro;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
+import com.sun.javaws.exceptions.InvalidArgumentException;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.EntityTemplate;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.killsoft.allegro.enums.Environment;
-import org.killsoft.allegro.objects.Auth;
-import org.killsoft.allegro.objects.Category;
-import org.killsoft.allegro.objects.Offer;
-import org.killsoft.allegro.objects.QueryParameters;
+import org.killsoft.allegro.mechanics.JsonInputs;
+import org.killsoft.allegro.objects.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 public class Allegro {
 
     private final Gson gson = new Gson();
+    private final Auth auth;
 
     private String token = null;
 
@@ -35,17 +41,18 @@ public class Allegro {
         this.cSecret = clientSecret;
         this.apiURI = environment.getApiUrl();
         this.environment = environment;
-    }
 
-    public Auth authenticate() {
         String details = this.cId + ":" + cSecret;
         String base64 = Base64.getUrlEncoder().encodeToString(details.getBytes()).replaceAll("\n", "");
-        System.out.println(base64);
-        Auth auth = gson.fromJson(getPage(environment.getAuthUrl() + "/auth/oauth/token?grant_type=client_credentials", "Authorization", "Basic " + base64), Auth.class);
+        this.auth = gson.fromJson(getPage(environment.getAuthUrl() + "/auth/oauth/token?grant_type=client_credentials", "Authorization", "Basic " + base64), Auth.class);
         this.token = auth.getToken();
-        return auth;
     }
 
+    public Auth getAuth() {
+        return this.auth;
+    }
+
+    //Requires Testing.
     public List<Offer> findOffers(QueryParameters parameters) {
         if(this.token == null) throw new NullPointerException("Token Can't be null!");
         StringBuilder url = new StringBuilder();
@@ -74,6 +81,14 @@ public class Allegro {
             offers.add(gson.fromJson(jsonElement, Offer.class));
         });
         return offers;
+    }
+
+    public UserRating getUserRatingSummary(int userId) {
+        if(this.token == null) throw new NullPointerException("Token Can't be null!");
+        HttpGet httpGet = new HttpGet(this.apiURI + "/users/" + userId + "/ratings-summary");
+        httpGet.addHeader("Accept", "application/vnd.allegro.public.v1+json");
+        httpGet.addHeader("Authorization", "Bearer " + this.token);
+        return gson.fromJson(getPage(httpGet), UserRating.class);
     }
 
     public Category[] getMainCategories() {
@@ -113,7 +128,7 @@ public class Allegro {
             obj.get("categories").getAsJsonArray().forEach(jsonElement -> {
                 Category cat = gson.fromJson(jsonElement, Category.class);
                 categories.add(cat);
-                if(!cat.isLeaf()) {
+                if (!cat.isLeaf()) {
                     categories.addAll(Arrays.asList(getSubCategories(cat)));
                 }
             });
@@ -121,7 +136,24 @@ public class Allegro {
         return categories.toArray(new Category[0]);
     }
 
-    private String getPage(HttpGet get) {
+    public CommandOutput modifyBuyNowPrice(int offerId, ChangePriceInput input)  {
+        if(this.token == null) throw new NullPointerException("Token Can't be null!");
+        HttpPut get = new HttpPut(this.environment.getApiUrl() + "/offers/" + offerId + "/change-price-commands/" + input.getID());
+        get.addHeader("Authorization", "Bearer " + this.token);
+        get.addHeader("Accept", "application/vnd.allegro.public.v1+json");
+        get.addHeader("Content-Type", "application/vnd.allegro.public.v1+json");
+        try {
+            get.setEntity(new StringEntity(JsonInputs.getPriceChangeInputJson(input).toString()));
+            return gson.fromJson(getPage(get), CommandOutput.class);
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("UnsupportedEncodingException, if shown please report at https://github.com/Kici33/Allegro-JavaAPI");
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private String getPage(HttpRequestBase get) {
         HttpClient client = HttpClients.custom().setDefaultRequestConfig(RequestConfig.custom()
                 .setCookieSpec(CookieSpecs.STANDARD).build()).build();
         try {
